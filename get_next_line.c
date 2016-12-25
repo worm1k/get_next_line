@@ -18,7 +18,7 @@ int		get_next_line(const int fd, char **line)
 	int		res;
 
 	i = 0;
-	res = -1;
+	res = 0;
 	ft_bzero(buf, BUFF_SIZE);
 	while(check = read(fd, buf + i, 1))
 	{
@@ -33,15 +33,10 @@ int		get_next_line(const int fd, char **line)
 		}
 		if (buf[i] == '\n')
 		{
-			printf("NBR\n");
 			temp = *line;
-			printf("111\n");
 			*line = ft_strjoin(*line, buf);
-			printf("222\n");
 			if (temp) free(temp);
-			printf("333\n");
 			res = 1;
-			printf("444\n");
 			break ;
 		}
 		i++;
@@ -54,8 +49,13 @@ int		get_next_line(const int fd, char **line)
 			continue ;
 		}
 	}
-
-	printf("655\n");
+	if (check == 0)
+	{
+		temp = *line;
+		*line = ft_strjoin(*line, buf);
+		if (temp) free(temp);
+	}
+	printf("CHECK:%d\n", check);
 	return (res);
 }
 
@@ -71,14 +71,14 @@ int main()
 	ft_read(fd);*/
 	
 	int val = get_next_line(fd, &res);
-	printf("NEXTLINE: %s\nRES: %d", res, val);
+	printf("NEXTLINE: %s\nRES: %d\n", res, val);
 	free(res);
 	res = 0;
 	val = get_next_line(fd, &res);
-	printf("NEXTLINE: %s\nRES: %d", res, val);
+	printf("NEXTLINE: %s\nRES: %d\n", res, val);
 	free(res);
 	res = 0;
 	val = get_next_line(fd, &res);
-	printf("NEXTLINE: %s\nRES: %d", res, val);
+	printf("NEXTLINE: %s\nRES: %d\n", res, val);
 	return (0);
 }
