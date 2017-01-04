@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include "libft.h"
 #include <stdio.h>
 
 static void			fl_print_lst(t_lst *lst)
@@ -27,7 +28,7 @@ static void			lst_del(t_lst **head, int fd)
 {
 	t_lst			*temp;
 	t_lst			*curr;
-	printf("DELETING:\n");
+	printf("DELETING: %d\n", fd);
 
 	if ((*head)->fd == fd)
 	{
@@ -119,7 +120,7 @@ int			main()
 	int fd;
 	int len;
 	char *buf;
-
+	ft_putstr("hiu\n");
 	get_next_line(5, &buf, 0);
 	get_next_line(5, &buf, 0);
 	get_next_line(3, &buf, 0);

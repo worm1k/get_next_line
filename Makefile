@@ -8,16 +8,16 @@ OBJ = $(SRC:.c=.o)
 all: $(NAME)
 	
 $(NAME): $(OBJ)
-	$(CC) -o $(NAME) $(OBJ)
+	$(CC) -o a $(OBJ) $(LIB)
 
 main.o:
-	$(CC) -o main.c $(LIB)
+	$(CC) -c main.c
 
 clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf fillit
+	rm -rf a
 
 re: fclean all
 	
