@@ -2,3 +2,4 @@
 *.exe.stackdump
 a
 *.o
+*.a
