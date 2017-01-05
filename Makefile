@@ -10,7 +10,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	$(CC) -o a $(OBJ) $(LIB)
 
-main.o:
+main.o: $(SRC)
 	$(CC) -c main.c
 
 clean:

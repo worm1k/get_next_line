@@ -64,8 +64,8 @@ t_lst				*lst_new(int fd)
 	res = (t_lst *)malloc(sizeof(t_lst));
 	res->next = 0;
 	res->fd = fd;
-	res->buf = (char *)malloc(sizeof(char) * BUFF_SIZE);
-	res->buf[0] = '1';
+	res->buf = ft_strnew(BUFF_SIZE);
+	if (res->buf)printf("CREATRED\n");
 	return (res);
 }
 
@@ -79,6 +79,7 @@ t_lst				*get_node(t_lst **head, const int fd)
 	{
 		printf("CREATING FIRST:");
 		*head = lst_new(fd);
+		curr = *head;
 	}
 	else
 	{
@@ -86,7 +87,6 @@ t_lst				*get_node(t_lst **head, const int fd)
 		{
 			if (curr->fd == fd)
 			{
-				curr->buf[0] += 1;
 				printf("FOUND RETURN1\n");
 				return (curr);
 			}
@@ -105,14 +105,38 @@ int					get_next_line(const int fd, char **line, int del)
 {
 	static t_lst	*head = 0;
 	t_lst			*ptr;
+	int				len;
+	char			*temp;
+	int				res;
+
 	ptr = get_node(&head, fd);
 	if (del != 0)
+	{
 		lst_del(&head, del);
-	fl_print_lst(head);
-
-	
+		return 0;
+	}
+	while (1)
+	{
+		if ((ptr->buf)[0] == '\0')
+		{
+			len = read(fd, ptr->buf, BUFF_SIZE);
+			// copy to \n
+			if (len < BUFF_SIZE)
+			{
+				temp = *line;
+				*line = ft_strjoin(*line, ptr->buf);
+				lst_del(&head, fd);
+				if (temp)
+					free(temp);
+				return (1);
+			}
+		}
+		else
+		{
+			len = read(fd, ptr->buf, BUFF_SIZE);
+		}
+	}
 	return 1;
-
 }
 
 int			main()
@@ -121,16 +145,9 @@ int			main()
 	int len;
 	char *buf;
 	ft_putstr("hiu\n");
-	get_next_line(5, &buf, 0);
-	get_next_line(5, &buf, 0);
-	get_next_line(3, &buf, 0);
-	get_next_line(4, &buf, 0);
-	get_next_line(3, &buf, 0);
-	get_next_line(5, &buf, 0);
-	get_next_line(3, &buf, 0);
-	get_next_line(4, &buf, 0);
-	get_next_line(4, &buf, 0);
-	get_next_line(5, &buf, 3);
+
+	get_next_line(open("test", O_RDONLY), &buf, 0);
+	printf("%s\n", buf);
 
 	close(fd);
 	return (0);
