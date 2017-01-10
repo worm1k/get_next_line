@@ -7,7 +7,7 @@ OBJ = $(SRC:.c=.o)
 
 all: $(NAME)
 	
-$(NAME): $(OBJ)
+$(NAME): main.o
 	$(CC) -o a $(OBJ) $(LIB)
 
 main.o: $(SRC)

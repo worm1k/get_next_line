@@ -24,7 +24,7 @@ static void			fl_print_lst(t_lst *lst)
 	}
 }
 
-static void			lst_del(t_lst **head, int fd)
+static int			lst_del(t_lst **head, int fd)
 {
 	t_lst			*temp;
 	t_lst			*curr;
@@ -37,7 +37,7 @@ static void			lst_del(t_lst **head, int fd)
 		free(*head);
 		*head = temp;
 		printf("DELETED HEAD\n");
-		return ;
+		return (0);
 	}
 	temp = *head;
 	curr = (*head)->next;
@@ -49,12 +49,13 @@ static void			lst_del(t_lst **head, int fd)
 			free(curr->buf);
 			free(curr);
 			printf("DELETED\n");
-			return ;
+			return (0);
 		}
 		temp = curr;
 		curr = curr->next;
 	}
 	printf("DEL ERROR");
+	return (1);
 }
 
 t_lst				*lst_new(int fd)
@@ -101,6 +102,24 @@ t_lst				*get_node(t_lst **head, const int fd)
 	return (curr);
 }
 
+int					read_to_nbr(char *buf, char **line)
+{
+	char			*end;
+
+	if (!buf || *buf == '\0')
+		return (0);
+	end = ft_strchr(buf, '\n');
+	if (end)
+	{
+		*line = ft_strnew(end - buf);
+		ft_memcpy(*line, buf, end - buf);
+		ft_memmove(buf, buf + (int)(end - buf) + 1, BUFF_SIZE - (int)(end - buf));
+		return (1);
+	}
+	*line = ft_strdup(buf);
+	return (1);
+}
+
 int					get_next_line(const int fd, char **line, int del)
 {
 	static t_lst	*head = 0;
@@ -115,26 +134,27 @@ int					get_next_line(const int fd, char **line, int del)
 		lst_del(&head, del);
 		return 0;
 	}
-	while (1)
+	if (!read_to_nbr(ptr->buf, line))
 	{
-		if ((ptr->buf)[0] == '\0')
-		{
-			len = read(fd, ptr->buf, BUFF_SIZE);
-			// copy to \n
-			if (len < BUFF_SIZE)
+		while((len = read(fd, ptr->buf, BUFF_SIZE)))
+			if (!ft_strchr(ptr->buf, '\n'))
 			{
+				if (len < 0)
+					return (-1);
 				temp = *line;
 				*line = ft_strjoin(*line, ptr->buf);
-				lst_del(&head, fd);
 				if (temp)
 					free(temp);
-				return (1);
+				if (len < BUFF_SIZE)
+				{
+					lst_del(&head, fd);
+					return (1);
+				}
 			}
-		}
-		else
-		{
-			len = read(fd, ptr->buf, BUFF_SIZE);
-		}
+			else
+				return (read_to_nbr(ptr->buf, line));
+		if (!(*line) && len == 0)
+			return (0);
 	}
 	return 1;
 }
@@ -144,10 +164,14 @@ int			main()
 	int fd;
 	int len;
 	char *buf;
-	ft_putstr("hiu\n");
 
-	get_next_line(open("test", O_RDONLY), &buf, 0);
-	printf("%s\n", buf);
+	fd = open("test", O_RDONLY);
+	
+	while (get_next_line(fd, &buf, 0))
+	{
+		printf("%s\n", buf);
+		if (buf) free(buf);
+	}
 
 	close(fd);
 	return (0);
