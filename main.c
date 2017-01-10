@@ -105,19 +105,29 @@ t_lst				*get_node(t_lst **head, const int fd)
 int					read_to_nbr(char *buf, char **line)
 {
 	char			*end;
+	int				len;
+	char			*after;
 
 	if (!buf || *buf == '\0')
 		return (0);
 	end = ft_strchr(buf, '\n');
+	len = end - buf;
+	after = buf + len + 1;
 	if (end)
 	{
-		*line = ft_strnew(end - buf);
-		ft_memcpy(*line, buf, end - buf);
-		ft_memmove(buf, buf + (int)(end - buf) + 1, BUFF_SIZE - (int)(end - buf));
+		*line = ft_strnew(len);
+		ft_memcpy(*line, buf, len);
+		ft_strcpy(buf, after);
+		ft_strclr(buf + strlen(after) + 1);
+		printf("COPIED1[%s]\n", *line);
+		printf("LEFT: [%s]\n", buf);
 		return (1);
 	}
 	*line = ft_strdup(buf);
-	return (1);
+	ft_strclr(buf);
+	printf("COPIED2[%s]\n", *line);
+	printf("LEFT: [%s]\n", buf);
+	return (0);
 }
 
 int					get_next_line(const int fd, char **line, int del)
@@ -137,22 +147,29 @@ int					get_next_line(const int fd, char **line, int del)
 	if (!read_to_nbr(ptr->buf, line))
 	{
 		while((len = read(fd, ptr->buf, BUFF_SIZE)))
+		{				
+			if (len < 0)
+				return (-1);
 			if (!ft_strchr(ptr->buf, '\n'))
 			{
-				if (len < 0)
-					return (-1);
+
 				temp = *line;
 				*line = ft_strjoin(*line, ptr->buf);
 				if (temp)
+				{
 					free(temp);
+				}
 				if (len < BUFF_SIZE)
 				{
 					lst_del(&head, fd);
-					return (1);
+					printf("RETURN0\n");
+					return (0);
 				}
 			}
 			else
 				return (read_to_nbr(ptr->buf, line));
+		}
+		printf("LEN: [%d]\n", len);
 		if (!(*line) && len == 0)
 			return (0);
 	}
@@ -170,7 +187,7 @@ int			main()
 	while (get_next_line(fd, &buf, 0))
 	{
 		printf("%s\n", buf);
-		if (buf) free(buf);
+		//if (buf) free(buf);
 	}
 
 	close(fd);
