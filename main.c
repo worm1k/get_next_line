@@ -102,35 +102,41 @@ t_lst				*get_node(t_lst **head, const int fd)
 	return (curr);
 }
 
-int					read_to_nbr(char *buf, char **line)
+int					read_to_nbr(t_lst *ptr, char **line)
 {
 	char			*end;
 	int				len;
 	char			*after;
+	char			*before;
+	char			*del;
 
-	if (!buf || *buf == '\0')
+	if (!(ptr->buf) || *(ptr->buf) == '\0')
+//		printf("RTNBR_RET0\n");
 		return (0);
-	end = ft_strchr(buf, '\n');
-	len = end - buf;
-	after = buf + len + 1;
+	end = ft_strchr((ptr->buf), '\n');
+	len = end - (ptr->buf);
+	after = (ptr->buf) + len + 1;
+	del = 0;
 	if (end)
 	{
-		*line = ft_strnew(len);
-		ft_memcpy(*line, buf, len);
-		ft_strcpy(buf, after);
-		ft_strclr(buf + strlen(after) + 1);
-		printf("COPIED1[%s]\n", *line);
-		printf("LEFT: [%s]\n", buf);
+		del = *line;
+		*line = ft_strjoin(*line, ft_strncpy(ft_strnew(len), (ptr->buf), len));
+		if (del)
+			free(del);
+//		ft_memcpy(*line, (ptr->buf), len);
+		ft_strcpy((ptr->buf), after);
+		ft_strclr((ptr->buf) + ft_strlen((ptr->buf)) + 1);
+//		printf("COPIED1[%s]\n", *line);
+//		printf("LEFT: [%s]\n", (ptr->buf));
 		return (1);
 	}
-	*line = ft_strdup(buf);
-	ft_strclr(buf);
-	printf("COPIED2[%s]\n", *line);
-	printf("LEFT: [%s]\n", buf);
+	*line = ft_strdup((ptr->buf));
+//	printf("COPIED2[%s]\n", *line);
+//	printf("LEFT: [%s]\n", (ptr->buf));
 	return (0);
 }
 
-int					get_next_line(const int fd, char **line, int del)
+int					get_next_line(const int fd, char **line)
 {
 	static t_lst	*head = 0;
 	t_lst			*ptr;
@@ -138,56 +144,54 @@ int					get_next_line(const int fd, char **line, int del)
 	char			*temp;
 	int				res;
 
+//	len = 0;
 	ptr = get_node(&head, fd);
-	if (del != 0)
-	{
-		lst_del(&head, del);
-		return 0;
-	}
-	if (!read_to_nbr(ptr->buf, line))
-	{
+	if (!read_to_nbr(ptr, line))
 		while((len = read(fd, ptr->buf, BUFF_SIZE)))
-		{				
+		{
 			if (len < 0)
 				return (-1);
+			(ptr->buf)[len] = '\0';
+//			printf("READ:[%s]\n", ptr->buf);
 			if (!ft_strchr(ptr->buf, '\n'))
 			{
-
 				temp = *line;
 				*line = ft_strjoin(*line, ptr->buf);
 				if (temp)
-				{
 					free(temp);
-				}
-				if (len < BUFF_SIZE)
-				{
-					lst_del(&head, fd);
-					printf("RETURN0\n");
-					return (0);
-				}
 			}
 			else
-				return (read_to_nbr(ptr->buf, line));
+				return (read_to_nbr(ptr, line));
 		}
-		printf("LEN: [%d]\n", len);
-		if (!(*line) && len == 0)
-			return (0);
-	}
-	return 1;
+//	printf("LEN: [%d]\n", len);
+	if (!(*line) && !(*(ptr->buf)))
+//		printf("RETURN0_ADN_DEL\n");
+		return (lst_del(&head, fd));
+//	printf("RETURN1\n");
+	return (1);
 }
 
 int			main()
 {
-	int fd;
+	int fd, fd2;
 	int len;
-	char *buf;
+	char *buf, *buf2;
+	int i = 0;
 
 	fd = open("test", O_RDONLY);
+	fd2 = open("test2", O_RDONLY);
 	
-	while (get_next_line(fd, &buf, 0))
+	while ( i < 10)
 	{
-		printf("%s\n", buf);
-		//if (buf) free(buf);
+		get_next_line(fd2, &buf2);
+		get_next_line(fd, &buf);
+		printf("PRINTF1:[%s]\n", buf);
+		printf("PRINTF2:[%s]\n", buf2);
+		if (buf) free(buf);
+		if (buf2) free(buf2);
+		buf = 0;
+		buf2 = 0;
+		i++;
 	}
 
 	close(fd);
