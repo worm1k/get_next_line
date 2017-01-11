@@ -55,7 +55,7 @@ static int			lst_del(t_lst **head, int fd)
 		curr = curr->next;
 	}
 	printf("DEL ERROR");
-	return (1);
+	return (0);
 }
 
 t_lst				*lst_new(int fd)
@@ -157,8 +157,7 @@ int					get_next_line(const int fd, char **line)
 			{
 				temp = *line;
 				*line = ft_strjoin(*line, ptr->buf);
-				if (temp)
-					free(temp);
+				(temp) ? free(temp) : 0;
 			}
 			else
 				return (read_to_nbr(ptr, line));
