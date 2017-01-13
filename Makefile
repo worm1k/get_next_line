@@ -2,22 +2,22 @@ NAME = get_next_line
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 LIB = libft.a
-SRC = 	main.c
-OBJ = $(SRC:.c=.o)
+SRC = get_next_line.c
+OBJ = get_next_line.o
 
 all: $(NAME)
 	
-$(NAME): main.o
-	$(CC) -o a $(OBJ) $(LIB)
+$(NAME): $(OBJ)
+	$(CC) -o $(NAME) $(OBJ) $(LIB)
 
-main.o: $(SRC)
-	$(CC) -c main.c
+$(OBJ): $(SRC)
+	$(CC) -c $(SRC)
 
 clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf a
+	rm -rf $(NAME)
 
 re: fclean all
 	
