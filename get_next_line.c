@@ -12,7 +12,7 @@
 
 #include "get_next_line.h"
 #include <stdio.h>
-
+/*
 static void			fl_print_lst(t_lst *lst)
 {
 	printf("PRINTING:\n");
@@ -22,12 +22,45 @@ static void			fl_print_lst(t_lst *lst)
 		lst = lst->next;
 	}
 }
+*/
+static int			lst_delone(t_lst **head, int fd)
+{
+	t_lst			*curr;
+	t_lst			*prev;
+//	printf("DELETING: %d\n", fd);
 
+	prev = 0;
+	curr = *head;
+	while (curr)
+	{
+		if (curr->fd == fd)
+		{
+			if (prev == 0)
+			{
+//				printf("DELETED HEAD\n");
+				*head = curr->next;
+			}
+			else
+			{
+//				printf("DELETED\n");
+				prev->next = curr->next;
+			}
+			free(curr->buf);
+			free(curr);
+			return (0);
+		}
+		prev = curr;
+		curr = curr->next;
+	}
+//	printf("DEL ERROR");
+	return (0);
+}
+/*
 static int			lst_del(t_lst **head, int fd)
 {
 	t_lst			*temp;
 	t_lst			*curr;
-	printf("DELETING: %d\n", fd);
+//	printf("DELETING: %d\n", fd);
 
 	if ((*head)->fd == fd)
 	{
@@ -35,7 +68,7 @@ static int			lst_del(t_lst **head, int fd)
 		free((*head)->buf);
 		free(*head);
 		*head = temp;
-		printf("DELETED HEAD\n");
+//		printf("DELETED HEAD\n");
 		return (0);
 	}
 	temp = *head;
@@ -47,16 +80,16 @@ static int			lst_del(t_lst **head, int fd)
 			temp->next = curr->next;
 			free(curr->buf);
 			free(curr);
-			printf("DELETED\n");
+//			printf("DELETED\n");
 			return (0);
 		}
 		temp = curr;
 		curr = curr->next;
 	}
-	printf("DEL ERROR");
+//	printf("DEL ERROR");
 	return (0);
 }
-
+*/
 t_lst				*lst_new(int fd)
 {
 	t_lst			*res;
@@ -65,7 +98,7 @@ t_lst				*lst_new(int fd)
 	res->next = 0;
 	res->fd = fd;
 	res->buf = ft_strnew(BUFF_SIZE);
-	if (res->buf)printf("CREATRED\n");
+//	if (res->buf)printf("CREATRED\n");
 	return (res);
 }
 
@@ -77,7 +110,7 @@ t_lst				*get_node(t_lst **head, const int fd)
 	curr = *head;
 	if (!*head)
 	{
-		printf("CREATING FIRST:");
+//		printf("CREATING FIRST:");
 		*head = lst_new(fd);
 		curr = *head;
 	}
@@ -87,15 +120,15 @@ t_lst				*get_node(t_lst **head, const int fd)
 		{
 			if (curr->fd == fd)
 			{
-				printf("FOUND RETURN1\n");
+//				printf("FOUND RETURN1\n");
 				return (curr);
 			}
 			temp = curr;
 			curr = curr->next;
 		}
-		printf("ADDING");
+//		printf("ADDING");
 		temp->next = lst_new(fd);
-		printf(" RETURN2\n");
+//		printf(" RETURN2\n");
 		return (temp->next);
 	}
 	return (curr);
@@ -106,7 +139,6 @@ int					read_to_nbr(t_lst *ptr, char **line)
 	char			*end;
 	int				len;
 	char			*after;
-	char			*before;
 	char			*del;
 
 	if (!(ptr->buf) || *(ptr->buf) == '\0')
@@ -124,12 +156,13 @@ int					read_to_nbr(t_lst *ptr, char **line)
 			free(del);
 //		ft_memcpy(*line, (ptr->buf), len);
 		ft_strcpy((ptr->buf), after);
-		ft_strclr((ptr->buf) + ft_strlen((ptr->buf)) + 1);
+//		ft_strclr((ptr->buf) + ft_strlen((ptr->buf)) + 1);
 //		printf("COPIED1[%s]\n", *line);
 //		printf("LEFT: [%s]\n", (ptr->buf));
 		return (1);
 	}
 	*line = ft_strdup((ptr->buf));
+	ft_strclr(ptr->buf);
 //	printf("COPIED2[%s]\n", *line);
 //	printf("LEFT: [%s]\n", (ptr->buf));
 	return (0);
@@ -141,7 +174,6 @@ int					get_next_line(const int fd, char **line)
 	t_lst			*ptr;
 	int				len;
 	char			*temp;
-	int				res;
 
 //	len = 0;
 	ptr = get_node(&head, fd);
@@ -157,40 +189,55 @@ int					get_next_line(const int fd, char **line)
 				temp = *line;
 				*line = ft_strjoin(*line, ptr->buf);
 				(temp) ? free(temp) : 0;
+				ft_strclr(ptr->buf);
 			}
 			else
 				return (read_to_nbr(ptr, line));
 		}
 //	printf("LEN: [%d]\n", len);
-	if (!(*line) && !(*(ptr->buf)))
+	return (!(*line) && !(*(ptr->buf))) ? (lst_delone(&head, fd)) : 1;
+//	if (!(*line) && !(*(ptr->buf)))
 //		printf("RETURN0_ADN_DEL\n");
-		return (lst_del(&head, fd));
+//		return (lst_delone(&head, fd));
 //	printf("RETURN1\n");
-	return (1);
+//	return (1);
 }
 
 int			main()
 {
-	int fd, fd2;
+	int fd;
 	int len;
-	char *buf, *buf2;
-	int i = 0;
+	char *buf;
 
 	fd = open("test", O_RDONLY);
-	fd2 = open("test2", O_RDONLY);
-	
-	while ( i < 10)
-	{
-		get_next_line(fd2, &buf2);
-		get_next_line(fd, &buf);
-		printf("PRINTF1:[%s]\n", buf);
-		printf("PRINTF2:[%s]\n", buf2);
-		if (buf) free(buf);
-		if (buf2) free(buf2);
-		buf = 0;
-		buf2 = 0;
-		i++;
-	}
+	len = get_next_line(fd, &buf);
+	printf("[%d]:%s\n", len, buf);
+	buf = 0;
+	len = get_next_line(fd, &buf);
+	printf("[%d]:%s\n", len, buf);
+	buf = 0;
+	len = get_next_line(fd, &buf);
+	printf("[%d]:%s\n", len, buf);
+	buf = 0;
+	len = get_next_line(fd, &buf);
+	printf("[%d]:%s\n", len, buf);
+	buf = 0;
+	len = get_next_line(fd, &buf);
+	printf("[%d]:%s\n", len, buf);
+	buf = 0;
+	len = get_next_line(fd, &buf);
+	printf("[%d]:%s\n", len, buf);
+	buf = 0;
+	len = get_next_line(fd, &buf);
+	printf("[%d]:%s\n", len, buf);
+	buf = 0;
+	len = get_next_line(fd, &buf);
+	printf("[%d]:%s\n", len, buf);
+	buf = 0;
+	len = get_next_line(fd, &buf);
+	printf("[%d]:%s\n", len, buf);
+	buf = 0;
+
 
 	close(fd);
 	return (0);
