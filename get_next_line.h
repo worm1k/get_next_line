@@ -11,8 +11,6 @@
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
-# define BUFF_SIZE 2
 # include <stdlib.h>
 # include <unistd.h>
 # include <sys/types.h>
@@ -20,9 +18,10 @@
 # include <fcntl.h>
 # include <string.h>
 # include "libft/libft.h"
+# define GET_NEXT_LINE_H
+# define BUFF_SIZE 2
 
-int		get_next_line(const int fd, char **line);
-
+int					get_next_line(const int fd, char **line);
 typedef struct		s_lst
 {
 	struct s_lst	*next;
